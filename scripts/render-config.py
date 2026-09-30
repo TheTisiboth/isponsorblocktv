@@ -59,6 +59,9 @@ config = {
     "join_name": "iSponsorBlockTV",
     "apikey": apikey,
     "channel_whitelist": [{"id": channel} for channel in whitelist],
+    "sponsorblock_api_url": os.environ.get(
+        "ISBTV_SPONSORBLOCK_API_URL", "https://sponsor.ajay.app/api/"
+    ).strip(),
     "use_proxy": False,
 }
 

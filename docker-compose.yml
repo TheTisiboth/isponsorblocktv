@@ -21,6 +21,7 @@ services:
       - ISBTV_AUTO_PLAY=${ISBTV_AUTO_PLAY:-true}
       - ISBTV_CHANNEL_WHITELIST=${ISBTV_CHANNEL_WHITELIST:-}
       - ISBTV_APIKEY=${ISBTV_APIKEY:-}
+      - ISBTV_SPONSORBLOCK_API_URL=${ISBTV_SPONSORBLOCK_API_URL:-https://sponsor.ajay.app/api/}
     volumes:
       - isponsorblocktv_data:/app/data
       - ./scripts/render-config.py:/render-config.py:ro
