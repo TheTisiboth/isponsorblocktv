@@ -1,0 +1,5 @@
+.env
+.env.*
+!.env.example
+.isbtv-setup/
+.DS_Store

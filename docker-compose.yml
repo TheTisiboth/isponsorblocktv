@@ -1,0 +1,44 @@
+x-isbtv-image: &isbtv-image ghcr.io/dmunozv04/isponsorblocktv:v2.11.0
+
+services:
+  # Renders /app/data/config.json from .env, then exits. iSponsorBlockTV only reads a JSON
+  # config file, so .env stays the single source of truth and the pairing token never gets
+  # committed. Reuses the app image (same pin, no extra pull) for its python3.
+  config-init:
+    image: *isbtv-image
+    container_name: isponsorblocktv-config-init
+    restart: "no"
+    entrypoint: ["python3", "/render-config.py"]
+    environment:
+      - ISBTV_SCREEN_ID=${ISBTV_SCREEN_ID}
+      - ISBTV_DEVICE_NAME=${ISBTV_DEVICE_NAME:-Chromecast}
+      - ISBTV_DEVICE_OFFSET=${ISBTV_DEVICE_OFFSET:-0}
+      - ISBTV_SKIP_CATEGORIES=${ISBTV_SKIP_CATEGORIES:-sponsor}
+      - ISBTV_MUTE_ADS=${ISBTV_MUTE_ADS:-true}
+      - ISBTV_SKIP_ADS=${ISBTV_SKIP_ADS:-true}
+      - ISBTV_MIN_SKIP_LENGTH=${ISBTV_MIN_SKIP_LENGTH:-1}
+      - ISBTV_SKIP_COUNT_TRACKING=${ISBTV_SKIP_COUNT_TRACKING:-true}
+      - ISBTV_AUTO_PLAY=${ISBTV_AUTO_PLAY:-true}
+      - ISBTV_CHANNEL_WHITELIST=${ISBTV_CHANNEL_WHITELIST:-}
+      - ISBTV_APIKEY=${ISBTV_APIKEY:-}
+    volumes:
+      - isponsorblocktv_data:/app/data
+      - ./scripts/render-config.py:/render-config.py:ro
+
+  isponsorblocktv:
+    image: *isbtv-image
+    container_name: isponsorblocktv
+    restart: unless-stopped
+    depends_on:
+      config-init:
+        condition: service_completed_successfully
+    volumes:
+      - isponsorblocktv_data:/app/data
+    environment:
+      - TZ=${TZ:-Europe/Brussels}
+    # No healthcheck: the app exposes no endpoint and the image ships no ps/pgrep, so any
+    # test here would be a no-op. Nothing routes to this container either (no Traefik).
+
+volumes:
+  isponsorblocktv_data:
+    driver: local
